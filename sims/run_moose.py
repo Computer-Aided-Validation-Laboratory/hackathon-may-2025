@@ -4,7 +4,7 @@ from mooseherder import (MooseConfig,
                          MooseRunner)
 
 
-MOOSE_FILE = "stc_thermech_funchs_wrad_std_ad.i"
+MOOSE_FILE = "stc_thermech_funchs_wrad_std.i"
 #MOOSE_FILE = "dogbone3d_plas_ad.i"
 
 MOOSE_PATH = Path("sims") / MOOSE_FILE

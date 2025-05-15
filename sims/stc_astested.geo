@@ -47,7 +47,7 @@ pipe_thick = 1.5e-3;    // correct
 pipe_leng = 100e-3;     // 130mm in CAD but probably ok
 
 // Must be an integer
-elem_order = 2;
+elem_order = 1;
 mesh_ref = 1;
 mesh_size = 2e-3/mesh_ref;
 

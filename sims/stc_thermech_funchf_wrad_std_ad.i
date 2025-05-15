@@ -11,12 +11,9 @@
 
 # Thermal Loads/BCs
 toK = 273.15
+ambTemp = ${fparse 20.0 + toK}
 coolantTemp = ${fparse 160.0 + toK}      # degK
-ambTemp = ${coolantTemp} # ${fparse 20.0 + toK}
 
-# Required for exponential decay of heatsource through skin
-skinDepth = 0.5e-3
-blockHeight = 35e-3
 
 # Mesh file string
 mesh_file = 'stc_astested.msh'
@@ -42,6 +39,13 @@ elem_order = 'FIRST'
     []
 []
 
+[Kernels]
+    [heat_conduction]
+        type = ADHeatConduction
+        variable = temperature
+    []
+[]
+
 [Functions]
     [ss_density_fun]
         type = PiecewiseLinear
@@ -58,6 +62,7 @@ elem_order = 'FIRST'
         data_file = ./data/ss316L_therm_spec_heat_K.csv
         format = columns
     []
+
     [ss_therm_exp_fun]
         type = PiecewiseLinear
         data_file = ./data/ss316L_therm_exp_K.csv
@@ -69,20 +74,19 @@ elem_order = 'FIRST'
         format = columns
     []
 
-
-    [surf_hs_spat_fun]
+    [surf_hf_spat_fun]
         type = PiecewiseBilinear
-        data_file = ./data/surf_hs.csv
+        data_file = ./data/surf_hf.csv
         xaxis = 0 # x in csv is x geometry for the top surface
         yaxis = 2 # y in csv is z geometry for the top surface
     []
-    [depth_hs_fun]
+    [surf_hf_scale_fun]
         type = ParsedFunction
-        expression = 'exp((y-${blockHeight})/${skinDepth})'
+        expression = '1.0'
     []
-    [vol_hs_fun]
+    [surf_hf_fun]
         type = CompositeFunction
-        functions = 'depth_hs_fun surf_hs_spat_fun'
+        functions = 'surf_hf_scale_fun surf_hf_spat_fun'
     []
 
 []
@@ -102,18 +106,6 @@ elem_order = 'FIRST'
 
         # 'effective_plastic_strain'
         generate_output = 'vonmises_stress stress_xx stress_yy stress_zz stress_xy stress_yz stress_xz strain_xx strain_yy strain_zz strain_xy strain_yz strain_xz'
-    []
-[]
-
-[Kernels]
-    [heat_conduction]
-        type = ADHeatConduction
-        variable = temperature
-    []
-    [heat_source]
-        type = HeatSource
-        variable = temperature
-        function = vol_hs_fun
     []
 []
 
@@ -139,7 +131,6 @@ elem_order = 'FIRST'
         function = ss_therm_spec_heat_fun
         block = 'stc-vol'
     []
-
 
     [ss_expansion]
         type = ADComputeInstantaneousThermalExpansionFunctionEigenstrain
@@ -167,6 +158,7 @@ elem_order = 'FIRST'
         type = ADComputeFiniteStrainElasticStress
     []
 
+
     # HTC from sieder-tate with HIVE test conditions
     [coolant_heat_transfer_coefficient]
         type = ADPiecewiseLinearInterpolationMaterial
@@ -193,15 +185,21 @@ elem_order = 'FIRST'
         T_infinity = ${coolantTemp}
         heat_transfer_coefficient = heat_transfer_coefficient
     []
-    # [radiation_flux]
-    #     type = ADFunctionRadiativeBC
-    #     variable = temperature
-    #     boundary = 'bc-top-heatflux bc-base-surf bc-left-surf bc-right-surf bc-front-surf bc-back-surf'
-    #     emissivity_function = '1'
-    #     Tinfinity = ${ambTemp}
-    #     stefan_boltzmann_constant = 5.67e-8
-    #     use_displaced_mesh = False
-    # []
+    [heat_flux_in]
+        type = ADFunctionNeumannBC
+        variable = temperature
+        boundary = 'bc-top-heatflux'
+        function = surf_hf_fun
+    []
+    [radiation_flux]
+        type = ADFunctionRadiativeBC
+        variable = temperature
+        boundary = 'bc-top-heatflux bc-base-surf bc-left-surf bc-right-surf bc-front-surf bc-back-surf'
+        emissivity_function = '1'
+        Tinfinity = ${ambTemp}
+        stefan_boltzmann_constant = 5.67e-8
+        use_displaced_mesh = false
+    []
 
     # Lock disp_y for whole base
     [mech_bc_c_dispy]
@@ -222,67 +220,27 @@ elem_order = 'FIRST'
         boundary = 'bc-base-surf'
         value = 0.0
     []
-
-    # # Lock all disp DOFs at the center of the block
-    # [mech_bc_c_dispx]
-    #     type = ADDirichletBC
-    #     variable = disp_x
-    #     boundary = 'bc-base-c-loc-xyz'
-    #     value = 0.0
-    # []
-    # [mech_bc_c_dispz]
-    #     type = ADDirichletBC
-    #     variable = disp_z
-    #     boundary = 'bc-base-c-loc-xyz'
-    #     value = 0.0
-    # []
-
-    # # Lock z dof along x axis
-    # [mech_bc_px_dispz]
-    #     type = ADDirichletBC
-    #     variable = disp_z
-    #     boundary = 'bc-base-nx-loc-z'
-    #     value = 0.0
-    # []
-
-    # # Lock x dof along z
-    # [mech_bc_pz_dispx]
-    #     type = ADDirichletBC
-    #     variable = disp_x
-    #     boundary = 'bc-base-pz-loc-x'
-    #     value = 0.0
-    # []
-    # [mech_bc_nz_dispx]
-    #     type = ADDirichletBC
-    #     variable = disp_x
-    #     boundary = 'bc-base-nz-loc-x'
-    #     value = 0.0
-    # []
-[]
-
-[Preconditioning]
-  [smp]
-    type = SMP
-    full = true
-  []
 []
 
 [Executioner]
     type = Steady
 
-    solve_type = 'NEWTON'
-    petsc_options = '-snes_converged_reason'
-    petsc_options_iname = '-pc_type -pc_hypre_type -ksp_type -ksp_gmres_restart'
-    petsc_options_value = ' hypre    boomeramg      gmres     200'
 
     # Best solver options for low element count large deformation plasticity
-    # solve_type = 'NEWTON' # 'NEWTON'
+    # solve_type = 'NEWTON'
     # petsc_options = '-snes_converged_reason'
     # petsc_options_iname = '-pc_type -ksp_type -ksp_gmres_restart'
     # petsc_options_value = ' lu       gmres     200'
 
-    l_max_its = 500
-    l_tol = 1e-4
+
+    # Best options for thermal solve
+    solve_type = 'NEWTON' # 'NEWTON' or 'PJFNK'
+    petsc_options = '-snes_converged_reason'
+    petsc_options_iname = '-pc_type -pc_hypre_type -ksp_type -ksp_gmres_restart'
+    petsc_options_value = ' hypre    boomeramg      gmres     200'
+
+    l_max_its = 200
+    l_tol = 1e-6
 
     nl_max_its = 50
     nl_rel_tol = 1e-4
@@ -295,7 +253,6 @@ elem_order = 'FIRST'
     #     type = SimplePredictor
     #     scale = 1
     # []
-
 []
 
 [Postprocessors]

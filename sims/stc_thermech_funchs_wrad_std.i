@@ -90,24 +90,23 @@ elem_order = 'FIRST'
 # https://mooseframework.inl.gov/syntax/Physics/SolidMechanics/QuasiStatic/index.html
 [Physics/SolidMechanics/QuasiStatic]
     [all]
-        strain = SMALL
+        strain = FINITE
         incremental = true
         add_variables = true
 
-        use_automatic_differentiation = true
+        use_automatic_differentiation = false
         automatic_eigenstrain_names = true
 
         material_output_family = MONOMIAL   # MONOMIAL, LAGRANGE
         material_output_order = FIRST      # CONSTANT, FIRST, SECOND,
 
-        # 'effective_plastic_strain'
         generate_output = 'vonmises_stress stress_xx stress_yy stress_zz stress_xy stress_yz stress_xz strain_xx strain_yy strain_zz strain_xy strain_yz strain_xz'
     []
 []
 
 [Kernels]
     [heat_conduction]
-        type = ADHeatConduction
+        type = HeatConduction
         variable = temperature
     []
     [heat_source]
@@ -119,21 +118,21 @@ elem_order = 'FIRST'
 
 [Materials]
     [ss_density]
-        type = ADCoupledValueFunctionMaterial
+        type = CoupledValueFunctionMaterial
         v = temperature
         prop_name = density
         function = ss_density_fun
         block = 'stc-vol'
     []
     [ss_thermal_conductivity]
-        type = ADCoupledValueFunctionMaterial
+        type = CoupledValueFunctionMaterial
         v = temperature
         prop_name = thermal_conductivity
         function = ss_therm_cond_fun
         block = 'stc-vol'
     []
     [ss_specific_heat]
-        type = ADCoupledValueFunctionMaterial
+        type = CoupledValueFunctionMaterial
         v = temperature
         prop_name = specific_heat
         function = ss_therm_spec_heat_fun
@@ -141,8 +140,26 @@ elem_order = 'FIRST'
     []
 
 
+    [ss_elastic_modulus]
+        type = CoupledValueFunctionMaterial
+        v = temperature
+        prop_name = elastic_modulus
+        function = ss_mech_elas_mod_fun
+        block = 'stc-vol'
+    []
+    [ss_elasticity]
+        type = ComputeVariableIsotropicElasticityTensor
+        args = temperature # Not needed for AD version for some reason
+        youngs_modulus = elastic_modulus
+        poissons_ratio = 0.3
+        block = 'stc-vol'
+    []
+    [stress]
+        type = ComputeFiniteStrainElasticStress
+    []
+
     [ss_expansion]
-        type = ADComputeInstantaneousThermalExpansionFunctionEigenstrain
+        type = ComputeInstantaneousThermalExpansionFunctionEigenstrain
         temperature = temperature
         stress_free_temperature = ${ambTemp}
         thermal_expansion_function = ss_therm_exp_fun
@@ -150,26 +167,9 @@ elem_order = 'FIRST'
         block = 'stc-vol'
     []
 
-    [ss_elastic_modulus]
-        type = ADCoupledValueFunctionMaterial
-        v = temperature
-        prop_name = elastic_modulus
-        function = ss_mech_elas_mod_fun
-        block = 'stc-vol'
-    []
-    [ss_elasticity]
-        type = ADComputeVariableIsotropicElasticityTensor
-        youngs_modulus = elastic_modulus
-        poissons_ratio = 0.3
-        block = 'stc-vol'
-    []
-    [stress]
-        type = ADComputeFiniteStrainElasticStress
-    []
-
     # HTC from sieder-tate with HIVE test conditions
     [coolant_heat_transfer_coefficient]
-        type = ADPiecewiseLinearInterpolationMaterial
+        type = PiecewiseLinearInterpolationMaterial
         xy_data = '
             274 23.6e3
             323 31.9e3
@@ -187,14 +187,14 @@ elem_order = 'FIRST'
 
 [BCs]
     [heat_flux_out]
-        type = ADConvectiveHeatFluxBC
+        type = ConvectiveHeatFluxBC
         variable = temperature
         boundary = 'bc-pipe-htc'
         T_infinity = ${coolantTemp}
         heat_transfer_coefficient = heat_transfer_coefficient
     []
     # [radiation_flux]
-    #     type = ADFunctionRadiativeBC
+    #     type = FunctionRadiativeBC
     #     variable = temperature
     #     boundary = 'bc-top-heatflux bc-base-surf bc-left-surf bc-right-surf bc-front-surf bc-back-surf'
     #     emissivity_function = '1'
@@ -205,59 +205,59 @@ elem_order = 'FIRST'
 
     # Lock disp_y for whole base
     [mech_bc_c_dispy]
-        type = ADDirichletBC
+        type = DirichletBC
         variable = disp_y
         boundary = 'bc-base-surf'
         value = 0.0
     []
-    [mech_bc_c_dispx]
-        type = ADDirichletBC
-        variable = disp_x
-        boundary = 'bc-base-surf'
-        value = 0.0
-    []
-    [mech_bc_c_dispz]
-        type = ADDirichletBC
-        variable = disp_z
-        boundary = 'bc-base-surf'
-        value = 0.0
-    []
-
-    # # Lock all disp DOFs at the center of the block
     # [mech_bc_c_dispx]
-    #     type = ADDirichletBC
+    #     type = DirichletBC
     #     variable = disp_x
-    #     boundary = 'bc-base-c-loc-xyz'
+    #     boundary = 'bc-base-surf'
     #     value = 0.0
     # []
     # [mech_bc_c_dispz]
-    #     type = ADDirichletBC
+    #     type = DirichletBC
     #     variable = disp_z
-    #     boundary = 'bc-base-c-loc-xyz'
+    #     boundary = 'bc-base-surf'
     #     value = 0.0
     # []
 
-    # # Lock z dof along x axis
-    # [mech_bc_px_dispz]
-    #     type = ADDirichletBC
-    #     variable = disp_z
-    #     boundary = 'bc-base-nx-loc-z'
-    #     value = 0.0
-    # []
+    # Lock all disp DOFs at the center of the block
+    [mech_bc_c_dispx]
+        type = DirichletBC
+        variable = disp_x
+        boundary = 'bc-base-c-loc-xyz'
+        value = 0.0
+    []
+    [mech_bc_c_dispz]
+        type = DirichletBC
+        variable = disp_z
+        boundary = 'bc-base-c-loc-xyz'
+        value = 0.0
+    []
 
-    # # Lock x dof along z
-    # [mech_bc_pz_dispx]
-    #     type = ADDirichletBC
-    #     variable = disp_x
-    #     boundary = 'bc-base-pz-loc-x'
-    #     value = 0.0
-    # []
-    # [mech_bc_nz_dispx]
-    #     type = ADDirichletBC
-    #     variable = disp_x
-    #     boundary = 'bc-base-nz-loc-x'
-    #     value = 0.0
-    # []
+    # Lock z dof along x axis
+    [mech_bc_px_dispz]
+        type = DirichletBC
+        variable = disp_z
+        boundary = 'bc-base-nx-loc-z'
+        value = 0.0
+    []
+
+    # Lock x dof along z
+    [mech_bc_pz_dispx]
+        type = DirichletBC
+        variable = disp_x
+        boundary = 'bc-base-pz-loc-x'
+        value = 0.0
+    []
+    [mech_bc_nz_dispx]
+        type = DirichletBC
+        variable = disp_x
+        boundary = 'bc-base-nz-loc-x'
+        value = 0.0
+    []
 []
 
 [Preconditioning]
