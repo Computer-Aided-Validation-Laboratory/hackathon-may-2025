@@ -13,8 +13,8 @@
 
 # NOTE: disp of 0.01275e-3 gives 2 microstrain plastic
 
-endTime = 100
-elasticTime = 25
+endTime = 200
+elasticTime = 20
 timeStep = 1
 topDispRate = ${fparse 0.01275e-3/elasticTime}  # m/s
 
@@ -37,7 +37,7 @@ ss316LHardMod = 5000e6     # Pa
 
 [Mesh]
     type = FileMesh
-    file = 'dogbone3d.msh'
+    file = 'dogbone_3d.msh'
 []
 
 # https://mooseframework.inl.gov/syntax/Physics/SolidMechanics/QuasiStatic/index.html

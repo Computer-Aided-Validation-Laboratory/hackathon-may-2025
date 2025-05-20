@@ -5,8 +5,8 @@
 #-------------------------------------------------------------------------
 #_* MOOSEHERDER VARIABLES - START
 
-endTime = 20
-timeStep = 1
+endTime = 30
+timeStep = 0.5
 
 coolantTemp= 150.0      # degC
 heatTransCoeff= 125.0e3 # W.m^-2.K^-1
@@ -48,7 +48,7 @@ cuThermExp = 17.8e-6 # 1/degC
 wThermExp = 4.72e-6 # 1/degC
 
 # Mesh file string
-mesh_file = 'case16.msh'
+mesh_file = 'monoblock_3d.msh'
 
 #** MOOSEHERDER VARIABLES - END
 #-------------------------------------------------------------------------
@@ -83,13 +83,13 @@ mesh_file = 'case16.msh'
 
 [Modules/TensorMechanics/Master]
   [all]
-      strain = SMALL                      # SMALL or FINITE
+      strain = FINITE                      # SMALL or FINITE
       incremental = true
       add_variables = true
       material_output_family = MONOMIAL   # MONOMIAL, LAGRANGE
       material_output_order = FIRST       # CONSTANT, FIRST, SECOND,
       automatic_eigenstrain_names = true
-      generate_output = 'strain_xx strain_xy strain_xz strain_yx strain_yy strain_yz strain_zx strain_zy strain_zz'
+      generate_output = 'vonmises_stress stress_xx stress_yy stress_zz stress_xy stress_yz stress_xz strain_xx strain_yy strain_zz strain_xy strain_yz strain_xz'
   []
 []
 

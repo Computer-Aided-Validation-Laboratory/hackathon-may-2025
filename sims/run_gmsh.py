@@ -8,8 +8,10 @@ import time
 from pathlib import Path
 from mooseherder import GmshRunner
 
+#GMSH_FILE = "dogbone_3d.geo"
+GMSH_FILE = "platewholetension_3d.geo"
+#GMSH_FILE = "monoblock_3d.geo"
 
-GMSH_FILE = "stc_astested.geo"
 GMSH_PATH = Path("sims") / GMSH_FILE
 
 PARSE_ONLY = False

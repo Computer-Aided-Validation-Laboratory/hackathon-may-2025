@@ -1,5 +1,6 @@
-# Moose output
+# Moose/Gmsh output
 *.e
+*.msh
 
 # vscode
 .vscode/

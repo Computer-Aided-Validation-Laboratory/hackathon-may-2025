@@ -3,9 +3,12 @@ from pathlib import Path
 from mooseherder import (MooseConfig,
                          MooseRunner)
 
+#MOOSE_FILE = "stc_therm_funchs_wrad_trans_ad.i"
+#MOOSE_FILE = "dogbone_mech_3d_plas_ad.i"
+#MOOSE_FILE = "plate_therm_2d.i"
+#MOOSE_FILE = "platewholetension_mech_3d.i"
+MOOSE_FILE = "monoblock_thermmech_3d.i"
 
-MOOSE_FILE = "stc_thermech_funchs_wrad_std.i"
-#MOOSE_FILE = "dogbone3d_plas_ad.i"
 
 MOOSE_PATH = Path("sims") / MOOSE_FILE
 

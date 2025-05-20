@@ -22,7 +22,7 @@ Geometry.VolumeLabels = 0;
 
 //------------------------------------------------------------------------------
 //_* MOOSEHERDER VARIABLES - START
-file_name = "case16.msh";
+file_name = "monoblock_3d.msh";
 num_threads = 8;
 
 // Specified Geometry variables
@@ -57,7 +57,7 @@ pipe_cent_y = interlayer_rad_ext + monoblock_side;
 
 // Calculated Mesh Variables
 pipe_sect_nodes = Round(mesh_ref*5); // Must be odd
-pipe_rad_nodes = Round(mesh_ref*4);
+pipe_rad_nodes = Round(mesh_ref*5);
 interlayer_rad_nodes = Round(mesh_ref*4);
 monoblock_side_nodes = Round(mesh_ref*5);
 monoblock_arm_nodes = Round(mesh_ref*5);
@@ -386,6 +386,6 @@ Mesh 3;
 //------------------------------------------------------------------------------
 // Save and exit
 Save Str(file_name);
-Exit;
+//Exit;
 
 

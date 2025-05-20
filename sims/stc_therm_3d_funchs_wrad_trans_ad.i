@@ -6,21 +6,24 @@
 #_* MOOSEHERDER VARIABLES - START
 
 # NOTE: only used for transient solves
-endTime = 1
-timeStep = 1
+endTime = 300
+timeStep = 1.0
 
 # Thermal Loads/BCs
 toK = 273.15
-ambTemp = ${fparse 20.0 + toK}
-coolantTemp = ${fparse 160.0 + toK}      # degK
+coolantTemp = ${fparse 146.0 + toK}      # degK
+ambTemp = ${coolantTemp} #${fparse 20.0 + toK}           # degK
 
 # Required for exponential decay of heatsource through skin
-skinDepth = 0.5e-3
+skinDepth = 1.4e-3 # 1.4mm based on JHJ simulation and analytical calc
 blockHeight = 35e-3
+
+# Required for temporal evolution
+timeConst = 0.1   # s
 
 # Mesh file string
 mesh_file = 'stc_astested.msh'
-elem_order = 'SECOND'
+elem_order = 'FIRST'
 
 #** MOOSEHERDER VARIABLES - END
 #-------------------------------------------------------------------------
@@ -29,6 +32,7 @@ elem_order = 'SECOND'
     type = FileMesh
     file = ${mesh_file}
 []
+
 
 [Variables]
     [temperature]
@@ -67,11 +71,14 @@ elem_order = 'SECOND'
         type = ParsedFunction
         expression = 'exp((y-${blockHeight})/${skinDepth})'
     []
+    [time_hs_fun]
+        type = ParsedFunction
+        expression = '1-exp(-(1/${timeConst})*t)'
+    []
     [vol_hs_fun]
         type = CompositeFunction
-        functions = 'depth_hs_fun surf_hs_spat_fun'
+        functions = 'surf_hs_spat_fun depth_hs_fun time_hs_fun'
     []
-
 []
 
 [Kernels]
@@ -83,6 +90,10 @@ elem_order = 'SECOND'
         type = HeatSource
         variable = temperature
         function = vol_hs_fun
+    []
+    [time_derivative]
+        type = ADHeatConductionTimeDerivative
+        variable = temperature
     []
 []
 
@@ -135,23 +146,11 @@ elem_order = 'SECOND'
         T_infinity = ${coolantTemp}
         heat_transfer_coefficient = heat_transfer_coefficient
     []
-    # [heat_flux_in]
-    #     type = ADNeumannBC
-    #     variable = temperature
-    #     boundary = 'bc-top-heatflux'
-    #     value = ${surfHeatFlux}
-    # []
-    # [heat_flux_in]
-    #     type = ADFunctionNeumannBC
-    #     variable = temperature
-    #     boundary = 'bc-top-heatflux'
-    #     function = surf_hf_fun
-    # []
     [radiation_flux]
         type = ADFunctionRadiativeBC
         variable = temperature
         boundary = 'bc-top-heatflux bc-base-surf bc-left-surf bc-right-surf bc-front-surf bc-back-surf'
-        emissivity_function = '1'
+        emissivity_function = '0.5'
         Tinfinity = ${ambTemp}
         stefan_boltzmann_constant = 5.67e-8
         use_displaced_mesh = true
@@ -160,14 +159,12 @@ elem_order = 'SECOND'
 
 [Executioner]
     type = Transient
-
-    # Best options for thermal solve
     solve_type = 'NEWTON'
     petsc_options = '-snes_converged_reason'
-    petsc_options_iname = '-pc_type -pc_hypre_type -ksp_type -ksp_gmres_restart'
-    petsc_options_value = ' hypre    boomeramg      gmres     200'
+    petsc_options_iname = '-pc_type -pc_hypre_type'
+    petsc_options_value = ' hypre    boomeramg'
 
-    l_max_its = 200
+    l_max_its = 500
     l_tol = 1e-6
 
     nl_max_its = 50
@@ -177,11 +174,10 @@ elem_order = 'SECOND'
     end_time= ${endTime}
     dt = ${timeStep}
 
-    # [Predictor]
-    #     type = SimplePredictor
-    #     scale = 1
-    # []
-
+    [Predictor]
+        type = SimplePredictor
+        scale = 1
+    []
 []
 
 [Postprocessors]
