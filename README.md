@@ -29,6 +29,8 @@ git commit -m "Setting up my working branch"
 git push --set-upstream origin YOURINITIALS
 ```
 
+Now go back to your home directory ready to install pyvale: `cd`.
+
 ## Installing `pyvale`: Ubuntu
 We are going to work in an editable installation of `pyvale` so that we can push hot fixes and edit the code if needed. If you already know how to install an editable version of a python package into a virtual environment then all you need to do is clone `pyvale` from [here](https://github.com/Computer-Aided-Validation-Laboratory/pyvale) and then switch to the dev branch. If you would like a bit more detailed guidance then read on.
 
@@ -78,16 +80,17 @@ git pull
 ```
 
 ### Virtual Environment & Editable Install
-We recommend installing `pyvale` in a virtual environment using `venv`. Navigate  to the `pyvale` directory if you are not there already and run:
+We recommend installing `pyvale` in a virtual environment using `venv`. Navigate  to the hackathon-may-2025 directory if you are not there already and run:
 
 ```shell
 python3.11 -m venv .env
 source .venv/bin/activate
 ```
 
-As we are in the `pyvale` directory and our virtual environment is activated we can add an editable install to our virtual environment using:
+Now navigate to the `pyvale` directory and run the following with your virtual environment activated:
 
 ```shell
+cd ../pyvale
 pip install -e .
 ```
 
