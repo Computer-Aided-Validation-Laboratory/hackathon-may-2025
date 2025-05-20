@@ -7,14 +7,27 @@ First clone this repository to your home directory using:
 git clone git@github.com:Computer-Aided-Validation-Laboratory/hackathon-may-2025.git
 ```
 
+Navigate into the hackathon directory:
+```shell
+cd hackathon-may-2025
+```
+
 Now create your own branch using, replacing "YOURINTIALS" with your initials:
 ```shell
 git checkout -b "YOURINITIALS"
 ```
 
+Double check you are on your own branch should show *YOURINITIALS:
+```shell
+git branch
+```
 
-
-
+Now make sure you can push to your branch:
+```shell
+git add .
+git commit -m "Setting up my working branch"
+git push --set-upstream origin YOURINITIALS
+```
 
 ## Installing `pyvale`: Ubuntu
 We are going to work in an editable installation of `pyvale` so that we can push hot fixes and edit the code if needed. If you already know how to install an editable version of a python package into a virtual environment then all you need to do is clone `pyvale` from [here](https://github.com/Computer-Aided-Validation-Laboratory/pyvale) and then switch to the dev branch. If you would like a bit more detailed guidance then read on.
