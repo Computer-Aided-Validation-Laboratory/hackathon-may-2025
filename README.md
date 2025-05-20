@@ -1,7 +1,22 @@
 # `pyvale` Hackathon May 2025
 Welcome to the `pyvale` hackathon for May 2025.
 
-## Installing `pyvale`: Unbuntu
+## Cloning this Repository
+First clone this repository to your home directory using:
+```shell
+git clone git@github.com:Computer-Aided-Validation-Laboratory/hackathon-may-2025.git
+```
+
+Now create your own branch using, replacing "YOURINTIALS" with your initials:
+```shell
+git checkout -b "YOURINITIALS"
+```
+
+
+
+
+
+## Installing `pyvale`: Ubuntu
 We are going to work in an editable installation of `pyvale` so that we can push hot fixes and edit the code if needed. If you already know how to install an editable version of a python package into a virtual environment then all you need to do is clone `pyvale` from [here](https://github.com/Computer-Aided-Validation-Laboratory/pyvale) and then switch to the dev branch. If you would like a bit more detailed guidance then read on.
 
 ### Managing Python Versions
