@@ -154,7 +154,7 @@ For the 2nd simulation for the plate with a hole the challenge is to predict the
 NOTE: For this challenge you will need a MOOSE installation and Gmsh along with `mooseherder`. If you need help installing MOOSE let us know.
 
 For this challenge you been provided a series of three simulations:
-1. Thermal, 2D: rectangular plate with a bi-directional temperature gradient.
+1. Thermal, 2D: rectangular plate with a bi-directional temperature gradient
 2. Mechanical, 3D: linear elastic rectangular plate with a hole loaded in tension.
 3. Thermo-Mechanical, 3D: 3 material monoblock with a surface heat flux and active cooling, mechanical deformation results from thermo-mechanical coupling.
 
