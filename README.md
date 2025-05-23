@@ -44,6 +44,7 @@ sudo apt update && sudo apt upgrade -y
 Install python 3.11:
 ```shell
 sudo apt install python3.11
+sudo apt install python3.11-dev
 ```
 
 Add `venv` to your python 3.11 install:
@@ -83,7 +84,7 @@ git pull
 We recommend installing `pyvale` in a virtual environment using `venv`. Navigate  to the hackathon-may-2025 directory if you are not there already and run:
 
 ```shell
-python3.11 -m venv .env
+python3.11 -m venv .venv
 source .venv/bin/activate
 ```
 
