@@ -16,7 +16,7 @@ Geometry.VolumeLabels = 0;
 
 //------------------------------------------------------------------------------
 // Variables
-file_name = "dogbone3d.msh";
+file_name = "dogbone_3d.msh";
 
 // Variables: Specimen Geometry SS-J3 Specimen
 // Overall dimensions of the sample including gripped section
@@ -106,7 +106,7 @@ BooleanDifference{ Surface{s1,s2,s3,s4,s5,s6}; Delete; }
 MeshSize{ PointsOf{ Surface{:}; } } = elem_size;
 
 Extrude{0.0,0.0,spec_thick}{
-    Surface{:}; Layers{spec_thick_layers}; Recombine;
+    Surface{:}; Layers{spec_thick_layers}; //Recombine;
 }
 
 //------------------------------------------------------------------------------
